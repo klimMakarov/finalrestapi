@@ -1,0 +1,177 @@
+openapi: 3.0.0
+info:
+  title: ФСТР Перевалы API
+  description: REST API для приёма, редактирования и просмотра данных о горных перевалах
+  version: 1.0.0
+servers:
+  - url: http://89.232.188.78
+
+paths:
+  /api/submitData/:
+    post:
+      summary: Добавить новый перевал
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PerevalInput'
+      responses:
+        '200':
+          description: Успешно добавлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitResponse'
+        '400':
+          description: Не хватает обязательных полей
+        '500':
+          description: Ошибка сервера/БД
+
+    get:
+      summary: Список перевалов пользователя по email
+      parameters:
+        - name: user__email
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список перевалов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PerevalFull'
+
+  /api/submitData/{id}/:
+    get:
+      summary: Получить перевал по id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Данные о перевале
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PerevalFull'
+        '404':
+          description: Не найдено
+
+    patch:
+      summary: Отредактировать перевал (только если status = new)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PerevalInput'
+      responses:
+        '200':
+          description: Результат редактирования
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateResponse'
+
+components:
+  schemas:
+    PerevalInput:
+      type: object
+      properties:
+        beauty_title:
+          type: string
+        title:
+          type: string
+        other_titles:
+          type: string
+        connect:
+          type: string
+        add_time:
+          type: string
+        user:
+          type: object
+          properties:
+            email:
+              type: string
+            fam:
+              type: string
+            name:
+              type: string
+            otc:
+              type: string
+            phone:
+              type: string
+        coords:
+          type: object
+          properties:
+            latitude:
+              type: string
+            longitude:
+              type: string
+            height:
+              type: string
+        level:
+          type: object
+          properties:
+            winter:
+              type: string
+            summer:
+              type: string
+            autumn:
+              type: string
+            spring:
+              type: string
+        images:
+          type: array
+          items:
+            type: object
+            properties:
+              data:
+                type: string
+              title:
+                type: string
+
+    SubmitResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+          nullable: true
+        id:
+          type: integer
+          nullable: true
+
+    UpdateResponse:
+      type: object
+      properties:
+        state:
+          type: integer
+        message:
+          type: string
+
+    PerevalFull:
+      allOf:
+        - $ref: '#/components/schemas/PerevalInput'
+        - type: object
+          properties:
+            id:
+              type: integer
+            status:
+              type: string
+              enum: [new, pending, accepted, rejected]

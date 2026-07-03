@@ -96,3 +96,7 @@ def _update_pereval(request, pereval_id):
         return JsonResponse({'state': 0, 'message': f'Ошибка при обновлении: {e}'}, status=500)
 
     return JsonResponse({'state': 1 if success else 0, 'message': message}, status=200)
+
+
+def swagger_ui(request):
+    return render(request, 'swagger-ui.html')
